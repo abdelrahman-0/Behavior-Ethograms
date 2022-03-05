@@ -1,12 +1,8 @@
+from start import *
 import numpy as np
 import utils.button_event_functions as EVENTS
 import pandas as pd
-import random
 import datetime as dt
-import matplotlib
-matplotlib.use("Qt5Agg")
-import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
 from PyQt5 import QtCore, QtWidgets, QtGui
 from utils.warning_functions import DuplicateItemWarning
 
@@ -159,8 +155,6 @@ class BehaviorsDialog():
     def setupUi(self, Dialog: QtWidgets.QDialog, oldDialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         Dialog.setObjectName("Dialog")
         Dialog.resize(581, 335)
-
-        #### TODO
         # Dialog.setModal(False)
 
         self.label = QtWidgets.QLabel(Dialog)
@@ -239,7 +233,7 @@ class BehaviorsDialog():
 
             self.behavior_dicts += [behavior_dict]
 
-        self.connectButtons(dataframe, selected_subjects, behaviorGroupsList)
+        self.connectButtons(Dialog, dataframe, selected_subjects, behaviorGroupsList)
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -254,10 +248,10 @@ class BehaviorsDialog():
         self.pushButton_2.setText(_translate("Dialog", "Additional settings"))
         self.pushButton_3.setText(_translate("Dialog", "Back"))
 
-    def connectButtons(self, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
-        self.pushButton.clicked.connect(lambda : self.plotEthogram(dataframe, selected_subjects, behaviorGroupsList))
+    def connectButtons(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
+        self.pushButton.clicked.connect(lambda : self.plotEthogram(Dialog, dataframe, selected_subjects, behaviorGroupsList))
 
-    def plotEthogram(self, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
+    def plotEthogram(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         init = dt.datetime(2017, 1, 1)
         selected_behaviors = {}
         for behavior_dict in self.behavior_dicts:
@@ -270,7 +264,7 @@ class BehaviorsDialog():
         column_indices = {}
         for idx, col in enumerate(dataframe.columns):
             column_indices[col] = idx
-        fig, axs = plt.subplots(figsize=(20, len(selected_subjects) * 8), nrows=len(selected_subjects), ncols=1, sharex=True)
+        fig, axs = plt.subplots(figsize=(20, len(selected_subjects) * 0.75 + 10), nrows=len(selected_subjects), ncols=1, sharex=True)
         if len(selected_subjects) == 1:
             axs = [axs]
         for subject_idx, subject in enumerate(selected_subjects):
@@ -288,7 +282,10 @@ class BehaviorsDialog():
             axs[subject_idx].xaxis.set_major_formatter(DateFormatter("%H:%M:%S"))
             axs[subject_idx].set_xlabel("Time (HH:MM:SS)", fontdict={"fontsize": 12})
             axs[subject_idx].invert_yaxis()
+            axs[subject_idx].set_ylabel(subject, fontdict={"fontsize": 12})
+            axs[subject_idx].set_ylim(bottom=0, top=len(behaviorGroupsList) + 1)
 
         fig.autofmt_xdate()
-        plt.tight_layout()
+        fig.tight_layout()
+        Dialog.hide()
         plt.show()

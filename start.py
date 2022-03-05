@@ -1,3 +1,9 @@
+import matplotlib
+# matplotlib.use('Qt5Agg')
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.dates import DateFormatter
 from PyQt5 import QtCore, QtGui, QtWidgets
 import utils.button_event_functions as EVENTS
 
