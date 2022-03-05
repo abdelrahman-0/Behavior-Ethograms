@@ -1,0 +1,12 @@
+name: behavior_ethograms
+channels:
+- defaults
+dependencies:
+- python==3.9
+- numpy
+- matplotlib
+- pandas>=1.0.0
+- pip
+- pip:
+  - pyqt5
+  - pyqt5-tools
