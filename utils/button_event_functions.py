@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets
 from utils.plot_settings import AddGroupDialog, SubjectsDialog, BehaviorGroupsDialog, BehaviorsDialog
 from utils.warning_functions import InvalidPathWarning, InvalidCSVFileWarning, ZeroSubjectsWarning, ZeroBehaviorGroupsWarning
 
-def plot_function(textEdit):
+def plot_function(textEdit: QtWidgets.QTextEdit):
     path = textEdit.toPlainText().strip()
     if os.path.splitext(path)[-1] == '.csv' and os.path.exists(path):
         valid_csv, dataframe = checkCSV(path)
@@ -21,7 +21,7 @@ def openSubjectsDialog(dataframe):
     ui.setupUi(Dialog, dataframe)
     Dialog.exec_()
 
-def checkCSV(path):
+def checkCSV(path: str):
     valid_csv = False
     try:
         df = pd.read_csv(path, index_col=False)
@@ -36,7 +36,7 @@ def checkCSV(path):
     return valid_csv, df
 
 
-def getOpenFilesAndDirs(textEdit, parent=None, caption='', directory='', 
+def getOpenFilesAndDirs(textEdit: QtWidgets.QTextEdit, parent=None, caption='', directory='', 
                         filter='', initialFilter='', options=None):
     def updateText():
         selected = []
@@ -69,7 +69,7 @@ def getOpenFilesAndDirs(textEdit, parent=None, caption='', directory='',
     file = dialog.selectedFiles()[0]
     textEdit.setText(file)
 
-def openBehaviorGroupsDialog(dialogOld, dataframe, checkboxes):
+def openBehaviorGroupsDialog(dialogOld: QtWidgets.QDialog, dataframe: pd.DataFrame, checkboxes: list[QtWidgets.QCheckBox]):
     selected_subjects = []
     for checkbox in checkboxes:
         if checkbox.isChecked():

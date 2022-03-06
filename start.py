@@ -8,7 +8,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import utils.button_event_functions as EVENTS
 
 class Ui_MainWindow():
-    def setupUi(self, MainWindow):
+    def setupUi(self, MainWindow: QtWidgets.QMainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(515, 95)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -47,7 +47,7 @@ class Ui_MainWindow():
         self.connectButtons()
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, MainWindow: QtWidgets.QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Behavior-Ethograms Plotter"))
         self.pushButton.setText(_translate("MainWindow", "..."))

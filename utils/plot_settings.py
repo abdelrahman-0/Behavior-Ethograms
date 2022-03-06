@@ -9,7 +9,7 @@ from utils.warning_functions import DuplicateItemWarning
 DEFAULT_CMAP = plt.get_cmap('tab10')
 
 class SubjectsDialog():
-    def setupUi(self, Dialog: QtWidgets.QDialog, dataframe):
+    def setupUi(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame):
         Dialog.setObjectName("Dialog")
         Dialog.setModal(True)
         Dialog.resize(250, 270)
@@ -46,7 +46,7 @@ class SubjectsDialog():
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, Dialog: QtWidgets.QDialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Behavior-Ethograms Plotter"))
         self.pushButton.setText(_translate("Dialog", "Next"))
@@ -54,7 +54,7 @@ class SubjectsDialog():
 
 
 class BehaviorGroupsDialog():
-    def setupUi(self, Dialog, dialogOld, dataframe, selected_subjects):
+    def setupUi(self, Dialog: QtWidgets.QDialog, dialogOld: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list):
         Dialog.setObjectName("Dialog")
         Dialog.setModal(True)
         Dialog.resize(414, 351)
@@ -92,7 +92,7 @@ class BehaviorGroupsDialog():
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, Dialog: QtWidgets.QDialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Behavior-Group Settings"))
         self.label.setText(_translate("Dialog", "Set behavior-groups: Different behaviors can be grouped under one behavior-group in the final ethogram. Single behaviors need to be in a group of their own. The order of the groups in the final ethogram can be controlled by the \'Up\' and \'Down\' keys."))
@@ -108,7 +108,7 @@ class BehaviorGroupsDialog():
         self.pushButton_2.setDisabled(self.listWidget.count() == 0 or self.listWidget.currentRow() == self.listWidget.count() - 1)
         self.pushButton_4.setDisabled(self.listWidget.count() == 0)
 
-    def connectButtons(self, dialogOld, Dialog, dataframe, selected_subjects):
+    def connectButtons(self, dialogOld: QtWidgets.QDialog, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list):
         self.listWidget.itemSelectionChanged.connect(self.updateButtonsStatus)
         self.pushButton.clicked.connect(lambda : EVENTS.upButton(self.listWidget))
         self.pushButton_2.clicked.connect(lambda : EVENTS.downButton(self.listWidget))
@@ -118,7 +118,7 @@ class BehaviorGroupsDialog():
         self.pushButton_6.clicked.connect(lambda : EVENTS.closeBehaviorGroupsDialog(dialogOld, Dialog))
 
 class AddGroupDialog():
-    def setupUi(self, Dialog, listWidget: QtWidgets.QListWidget):
+    def setupUi(self, Dialog: QtWidgets.QDialog, listWidget: QtWidgets.QListWidget):
         Dialog.setObjectName("Dialog")
         Dialog.resize(322, 51)
         self.pushButton = QtWidgets.QPushButton(Dialog)
@@ -135,7 +135,7 @@ class AddGroupDialog():
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, Dialog: QtWidgets.QDialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Add Behavior-Group"))
         self.pushButton.setText(_translate("Dialog", "Add Group"))
@@ -143,7 +143,7 @@ class AddGroupDialog():
     def connectButtons(self, Dialog: QtWidgets.QDialog, listWidget: QtWidgets.QListWidget):
         self.pushButton.clicked.connect(lambda : self.addGroupEvent(Dialog, listWidget))
 
-    def addGroupEvent(self, Dialog, listWidget):
+    def addGroupEvent(self, Dialog: QtWidgets.QDialog, listWidget: QtWidgets.QListWidget):
         itemList =  [str(listWidget.item(i).text()) for i in range(listWidget.count())]
         text = self.textEdit.toPlainText()
         if text in itemList:
@@ -235,7 +235,7 @@ class BehaviorsDialog():
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, Dialog: QtWidgets.QDialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Match behaviors to behavior-groups"))
         self.label.setText(_translate("Dialog", "Select behaviors to be included in the final ethogram and match them with their group:"))
@@ -255,7 +255,7 @@ class BehaviorsDialog():
         for behavior_dict in self.behavior_dicts:
             if behavior_dict['behavior_checkbox'].isChecked():
                 options_dict = {}
-                options_dict['color'] = behavior_dict['color'].text()
+                options_dict['color'] = behavior_dict['color'].text().strip()
                 options_dict['group'] = behavior_dict['behavior_group'].currentText()
                 selected_behaviors[behavior_dict['behavior_checkbox'].text()] = options_dict
         dataframe = dataframe[dataframe['Behavior'].apply(lambda x : x in selected_behaviors.keys())]
