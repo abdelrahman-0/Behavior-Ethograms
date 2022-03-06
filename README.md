@@ -13,7 +13,7 @@ Clone repository & install conda environment:
 ```
 git clone https://github.com/abdelrahman-0/Behavior-Ethograms.git
 cd Behavior-Ethograms
-conda env create -f enivornment.yml
+conda env create -f environment.yml
 ```
 </details>
 <br>
