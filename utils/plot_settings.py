@@ -56,6 +56,7 @@ class SubjectsDialog():
 class BehaviorGroupsDialog():
     def setupUi(self, Dialog, dialogOld, dataframe, selected_subjects):
         Dialog.setObjectName("Dialog")
+        Dialog.setModal(True)
         Dialog.resize(414, 351)
         self.label = QtWidgets.QLabel(Dialog)
         self.label.setGeometry(QtCore.QRect(30, 10, 321, 61))
@@ -154,8 +155,8 @@ class AddGroupDialog():
 class BehaviorsDialog():
     def setupUi(self, Dialog: QtWidgets.QDialog, oldDialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         Dialog.setObjectName("Dialog")
+        Dialog.setModal(True)
         Dialog.resize(581, 335)
-        # Dialog.setModal(False)
 
         self.label = QtWidgets.QLabel(Dialog)
         self.label.setGeometry(QtCore.QRect(40, 20, 421, 21))
@@ -189,12 +190,9 @@ class BehaviorsDialog():
         font.setPointSize(8)
         self.pushButton.setFont(font)
         self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_2.setGeometry(QtCore.QRect(450, 270, 121, 23))
-        self.pushButton_2.setObjectName("pushButton_2")
         
         self.pushButton_3 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_3.setGeometry(QtCore.QRect(450, 240, 121, 21))
+        self.pushButton_3.setGeometry(QtCore.QRect(450, 270, 121, 23))
         self.pushButton_3.setObjectName("pushButton_3")
 
 
@@ -233,7 +231,7 @@ class BehaviorsDialog():
 
             self.behavior_dicts += [behavior_dict]
 
-        self.connectButtons(Dialog, dataframe, selected_subjects, behaviorGroupsList)
+        self.connectButtons(Dialog, oldDialog, dataframe, selected_subjects, behaviorGroupsList)
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -245,11 +243,11 @@ class BehaviorsDialog():
         self.label_behaviorGroup.setText(_translate("Dialog", "Behavior-Group"))
         self.label_behavior.setText(_translate("Dialog", "Behavior"))
         self.pushButton.setText(_translate("Dialog", "Plot"))
-        self.pushButton_2.setText(_translate("Dialog", "Additional settings"))
         self.pushButton_3.setText(_translate("Dialog", "Back"))
 
-    def connectButtons(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
+    def connectButtons(self, Dialog: QtWidgets.QDialog, oldDialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         self.pushButton.clicked.connect(lambda : self.plotEthogram(Dialog, dataframe, selected_subjects, behaviorGroupsList))
+        self.pushButton_3.clicked.connect(lambda : EVENTS.closeBehaviorsDialog(oldDialog, Dialog))
 
     def plotEthogram(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         init = dt.datetime(2017, 1, 1)

@@ -98,6 +98,10 @@ def openBehaviorsDialog(Dialog: QtWidgets.QDialog, listWidget: QtWidgets.QListWi
     else:
         ZeroBehaviorGroupsWarning()
 
+def closeBehaviorsDialog(dialogOld: QtWidgets.QDialog, Dialog: QtWidgets.QDialog):
+    dialogOld.show()
+    Dialog.close()
+
 def upButton(listWidget: QtWidgets.QListWidget):
     currentIndex = listWidget.currentRow()
     currentItem = listWidget.takeItem(currentIndex)
