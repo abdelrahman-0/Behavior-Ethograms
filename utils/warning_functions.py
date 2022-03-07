@@ -30,3 +30,10 @@ def DuplicateItemWarning():
     msg.setWindowTitle("Duplicate Group Warning")
     msg.setText('Behavior-Group already in list.\n')
     msg.exec_()
+
+def InvalidColorWarning():
+    msg = QMessageBox()
+    msg.setWindowTitle("Invalid Color Warning")
+    msg.setText('Invalid color hex-string.\n')
+    msg.setInformativeText('Please make sure all color codes consist of 6 hexadecimal characters (0-9, a-f, A-F). For example, red is encoded as \'ff0000\'')
+    msg.exec_()
