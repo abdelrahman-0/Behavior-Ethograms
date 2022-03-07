@@ -5,6 +5,7 @@ import pandas as pd
 import datetime as dt
 from PyQt5 import QtCore, QtWidgets, QtGui
 from utils.warning_functions import DuplicateItemWarning
+from collections import OrderedDict
 
 DEFAULT_CMAP = plt.get_cmap('tab10')
 
@@ -251,7 +252,7 @@ class BehaviorsDialog():
 
     def plotEthogram(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         init = dt.datetime(2017, 1, 1)
-        selected_behaviors = {}
+        selected_behaviors = OrderedDict()
         for behavior_dict in self.behavior_dicts:
             if behavior_dict['behavior_checkbox'].isChecked():
                 options_dict = {}
@@ -259,9 +260,6 @@ class BehaviorsDialog():
                 options_dict['group'] = behavior_dict['behavior_group'].currentText()
                 selected_behaviors[behavior_dict['behavior_checkbox'].text()] = options_dict
         dataframe = dataframe[dataframe['Behavior'].apply(lambda x : x in selected_behaviors.keys())]
-        column_indices = {}
-        for idx, col in enumerate(dataframe.columns):
-            column_indices[col] = idx
         fig, axs = plt.subplots(figsize=(20, len(selected_subjects) * 0.75 + 10), nrows=len(selected_subjects), ncols=1, sharex=True)
         if len(selected_subjects) == 1:
             axs = [axs]
@@ -279,9 +277,9 @@ class BehaviorsDialog():
             axs[subject_idx].xaxis_date()
             axs[subject_idx].xaxis.set_major_formatter(DateFormatter("%H:%M:%S"))
             axs[subject_idx].set_xlabel("Time (HH:MM:SS)", fontdict={"fontsize": 12})
-            axs[subject_idx].invert_yaxis()
             axs[subject_idx].set_ylabel(subject, fontdict={"fontsize": 12})
             axs[subject_idx].set_ylim(bottom=0, top=len(behaviorGroupsList) + 1)
+            axs[subject_idx].invert_yaxis()
 
         fig.autofmt_xdate()
         fig.tight_layout()
