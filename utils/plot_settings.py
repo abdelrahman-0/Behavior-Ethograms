@@ -5,7 +5,8 @@ import pandas as pd
 import datetime as dt
 import re
 from PyQt5 import QtCore, QtWidgets, QtGui
-from utils.warning_functions import DuplicateItemWarning
+from utils.warning_functions import DuplicateItemWarning, InvalidColorWarning
+import re
 from collections import OrderedDict
 
 DEFAULT_CMAP = plt.get_cmap('tab10')
@@ -284,7 +285,13 @@ class BehaviorsDialog():
         for behavior_dict in self.behavior_dicts:
             if behavior_dict['behavior_checkbox'].isChecked():
                 options_dict = {}
-                options_dict['color'] = behavior_dict['color'].text().strip()
+                color = behavior_dict['color'].text().strip()
+                if not re.match(r'^#?[A-Fa-f0-9]{6}$', color):
+                    InvalidColorWarning()
+                    return
+                if re.match(r'^#[A-Fa-f0-9]{6}$', color):
+                    color = color[1:]
+                options_dict['color'] = color
                 options_dict['group'] = behavior_dict['behavior_group'].currentText()
                 selected_behaviors[behavior_dict['behavior_checkbox'].text()] = options_dict
         dataframe = dataframe[dataframe['Behavior'].apply(lambda x : x in selected_behaviors.keys())]
