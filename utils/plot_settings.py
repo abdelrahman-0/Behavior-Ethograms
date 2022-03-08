@@ -5,7 +5,7 @@ import pandas as pd
 import datetime as dt
 import re
 from PyQt5 import QtCore, QtWidgets, QtGui
-from utils.warning_functions import DuplicateItemWarning, InvalidColorWarning
+from utils.warning_functions import DuplicateItemWarning, InvalidColorWarning, InvalidXLimitsWarning
 import re
 from collections import OrderedDict
 
@@ -252,8 +252,8 @@ class BehaviorsDialog():
 
         self.connectButtons(Dialog, oldDialog, dataframe, selected_subjects, behaviorGroupsList)
         self.retranslateUi(Dialog)
-        self.xLowerLimit = None
-        self.xUpperLimit = None
+        self.lowerXLimit = None
+        self.upperXLimit = None
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog: QtWidgets.QDialog):
@@ -315,6 +315,8 @@ class BehaviorsDialog():
             axs[subject_idx].set_ylabel(subject, fontdict={"fontsize": 12})
             axs[subject_idx].set_ylim(bottom=0, top=len(behaviorGroupsList) + 1)
             axs[subject_idx].invert_yaxis()
+            if self.lowerXLimit and self.upperXLimit:
+                axs[subject_idx].set_xlim(init + dt.timedelta(seconds=self.lowerXLimit), init + dt.timedelta(seconds=self.upperXLimit))
 
         fig.autofmt_xdate()
         fig.tight_layout()
@@ -322,7 +324,7 @@ class BehaviorsDialog():
         plt.show()
 
 class AdditionalSettingsDialog():
-    def setupUi(self, behaviorsDialogClassRef, Dialog):
+    def setupUi(self, behaviorsDialogClassRef, Dialog: QtWidgets.QDialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(344, 165)
         self.pushButton = QtWidgets.QPushButton(Dialog)
@@ -353,13 +355,13 @@ class AdditionalSettingsDialog():
         self.lineEdit_2.setGeometry(QtCore.QRect(120, 90, 81, 20))
         self.lineEdit_2.setObjectName("lineEdit_2")
 
-        self.checkBox.stateChanged.connect(lambda : self.onChecked())
+        self.checkBox.stateChanged.connect(lambda : self.onChecked(behaviorsDialogClassRef))
         self.pushButton.clicked.connect(lambda : self.update_xlimits(Dialog, behaviorsDialogClassRef))
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def onChecked(self):
+    def onChecked(self, behaviorsDialogClassRef):
         if self.checkBox.isChecked():
             self.lineEdit_2.setEnabled(False)
             self.lineEdit.setEnabled(False)
@@ -367,18 +369,27 @@ class AdditionalSettingsDialog():
             self.lineEdit_2.setEnabled(True)
             self.lineEdit.setEnabled(True)
 
-    def update_xlimits(self):
-        numericRE = '[0-9]+'
-        if re.search(numericRE, self.lineEdit.text()) and re.search(numericRE, self.lineEdit_2.text()):
-
+    def update_xlimits(self, Dialog: QtWidgets.QDialog, behaviorsDialogClassRef):
+        if not self.checkBox.isChecked():
+            numericRE = '^\+?[0-9]+$'
+            if re.search(numericRE, self.lineEdit.text()) and re.search(numericRE, self.lineEdit_2.text()):
+                print('here')
+                behaviorsDialogClassRef.lowerXLimit = int(self.lineEdit.text())
+                behaviorsDialogClassRef.upperXLimit = int(self.lineEdit_2.text())
+                Dialog.close()
+            else:
+                InvalidXLimitsWarning()
         else:
-            
+            behaviorsDialogClassRef.lowerXLimit = None
+            behaviorsDialogClassRef.upperXLimit = None
+            Dialog.close()
 
-    def retranslateUi(self, Dialog):
+
+    def retranslateUi(self, Dialog: QtWidgets.QDialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.pushButton.setText(_translate("Dialog", "Ok"))
-        self.checkBox.setText(_translate("Dialog", "set x-axis limit automatically"))
+        self.checkBox.setText(_translate("Dialog", "set x-axis limits automatically"))
         self.label.setText(_translate("Dialog", "lower x-limit:"))
         self.label_2.setText(_translate("Dialog", "seconds"))
         self.label_3.setText(_translate("Dialog", "upper x-limit:"))
