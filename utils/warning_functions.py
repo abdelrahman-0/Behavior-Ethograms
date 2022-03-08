@@ -30,3 +30,9 @@ def DuplicateItemWarning():
     msg.setWindowTitle("Duplicate Group Warning")
     msg.setText('Behavior-Group already in list.\n')
     msg.exec_()
+
+def InvalidXLimitsWarning():
+    msg = QMessageBox()
+    msg.setWindowTitle("Invalid x-limits Warning")
+    msg.setText('Please enter only numeric digits (0-9).\n')
+    msg.exec_()

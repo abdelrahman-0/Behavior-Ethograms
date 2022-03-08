@@ -3,11 +3,18 @@ import numpy as np
 import utils.button_event_functions as EVENTS
 import pandas as pd
 import datetime as dt
+import re
 from PyQt5 import QtCore, QtWidgets, QtGui
 from utils.warning_functions import DuplicateItemWarning
 from collections import OrderedDict
 
 DEFAULT_CMAP = plt.get_cmap('tab10')
+COLOR_DICT = {
+            'bounce': '0072b2',
+            'laying on floor': '42b48b',
+            'head attached': 'aaf0d2',
+            'wriggling': 'f8766d'
+            }
 
 class SubjectsDialog():
     def setupUi(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame):
@@ -191,9 +198,16 @@ class BehaviorsDialog():
         font.setPointSize(8)
         self.pushButton.setFont(font)
         self.pushButton.setObjectName("pushButton")
+
+        self.pushButton_2 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_2.setGeometry(QtCore.QRect(450, 270, 121, 23))
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName("pushButton")
         
         self.pushButton_3 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_3.setGeometry(QtCore.QRect(450, 270, 121, 23))
+        self.pushButton_3.setGeometry(QtCore.QRect(450, 240, 121, 23))
         self.pushButton_3.setObjectName("pushButton_3")
 
 
@@ -221,7 +235,10 @@ class BehaviorsDialog():
             colorTextEdit = QtWidgets.QLineEdit(Dialog)
             colorTextEdit.move(self.label_color.x() , y_val)
             colorTextEdit.setMaximumWidth(55)
-            colorTextEdit.setText('%02x%02x%02x' % tuple((np.array(DEFAULT_CMAP(i/(len(behaviors)-1))[:3]) * 255).astype(int)))
+            if behavior in COLOR_DICT.keys():
+                colorTextEdit.setText(COLOR_DICT[behavior])
+            else:
+                colorTextEdit.setText('%02x%02x%02x' % tuple(np.random.randint(0, 256, 3, dtype=int)))
             behavior_dict['color'] = colorTextEdit
 
             checkbox = QtWidgets.QCheckBox(Dialog)
@@ -234,6 +251,8 @@ class BehaviorsDialog():
 
         self.connectButtons(Dialog, oldDialog, dataframe, selected_subjects, behaviorGroupsList)
         self.retranslateUi(Dialog)
+        self.xLowerLimit = None
+        self.xUpperLimit = None
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog: QtWidgets.QDialog):
@@ -244,11 +263,20 @@ class BehaviorsDialog():
         self.label_behaviorGroup.setText(_translate("Dialog", "Behavior-Group"))
         self.label_behavior.setText(_translate("Dialog", "Behavior"))
         self.pushButton.setText(_translate("Dialog", "Plot"))
+        self.pushButton_2.setText(_translate("Dialog", "Additional Settings"))
         self.pushButton_3.setText(_translate("Dialog", "Back"))
 
     def connectButtons(self, Dialog: QtWidgets.QDialog, oldDialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         self.pushButton.clicked.connect(lambda : self.plotEthogram(Dialog, dataframe, selected_subjects, behaviorGroupsList))
+        self.pushButton_2.clicked.connect(lambda : self.openAdditionalSettings())
         self.pushButton_3.clicked.connect(lambda : EVENTS.closeBehaviorsDialog(oldDialog, Dialog))
+
+    def openAdditionalSettings(self):
+        Dialog = QtWidgets.QDialog()
+        ui = AdditionalSettingsDialog()
+        ui.setupUi(self, Dialog)
+        Dialog.exec_()
+
 
     def plotEthogram(self, Dialog: QtWidgets.QDialog, dataframe: pd.DataFrame, selected_subjects: list, behaviorGroupsList: list):
         init = dt.datetime(2017, 1, 1)
@@ -285,3 +313,66 @@ class BehaviorsDialog():
         fig.tight_layout()
         Dialog.hide()
         plt.show()
+
+class AdditionalSettingsDialog():
+    def setupUi(self, behaviorsDialogClassRef, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(344, 165)
+        self.pushButton = QtWidgets.QPushButton(Dialog)
+        self.pushButton.setGeometry(QtCore.QRect(260, 130, 75, 23))
+        self.pushButton.setObjectName("pushButton")
+        self.checkBox = QtWidgets.QCheckBox(Dialog)
+        self.checkBox.setGeometry(QtCore.QRect(30, 20, 161, 17))
+        self.checkBox.setChecked(True)
+        self.checkBox.setObjectName("checkBox")
+        self.label = QtWidgets.QLabel(Dialog)
+        self.label.setGeometry(QtCore.QRect(50, 60, 61, 16))
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(Dialog)
+        self.label_2.setGeometry(QtCore.QRect(210, 60, 47, 13))
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(Dialog)
+        self.label_3.setGeometry(QtCore.QRect(50, 90, 61, 16))
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(Dialog)
+        self.label_4.setGeometry(QtCore.QRect(210, 90, 47, 13))
+        self.label_4.setObjectName("label_4")
+        self.lineEdit = QtWidgets.QLineEdit(Dialog)
+        self.lineEdit.setEnabled(False)
+        self.lineEdit.setGeometry(QtCore.QRect(120, 60, 81, 20))
+        self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit_2 = QtWidgets.QLineEdit(Dialog)
+        self.lineEdit_2.setEnabled(False)
+        self.lineEdit_2.setGeometry(QtCore.QRect(120, 90, 81, 20))
+        self.lineEdit_2.setObjectName("lineEdit_2")
+
+        self.checkBox.stateChanged.connect(lambda : self.onChecked())
+        self.pushButton.clicked.connect(lambda : self.update_xlimits(Dialog, behaviorsDialogClassRef))
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def onChecked(self):
+        if self.checkBox.isChecked():
+            self.lineEdit_2.setEnabled(False)
+            self.lineEdit.setEnabled(False)
+        else:
+            self.lineEdit_2.setEnabled(True)
+            self.lineEdit.setEnabled(True)
+
+    def update_xlimits(self):
+        numericRE = '[0-9]+'
+        if re.search(numericRE, self.lineEdit.text()) and re.search(numericRE, self.lineEdit_2.text()):
+
+        else:
+            
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.pushButton.setText(_translate("Dialog", "Ok"))
+        self.checkBox.setText(_translate("Dialog", "set x-axis limit automatically"))
+        self.label.setText(_translate("Dialog", "lower x-limit:"))
+        self.label_2.setText(_translate("Dialog", "seconds"))
+        self.label_3.setText(_translate("Dialog", "upper x-limit:"))
+        self.label_4.setText(_translate("Dialog", "seconds"))

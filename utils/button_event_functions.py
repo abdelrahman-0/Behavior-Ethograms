@@ -89,7 +89,6 @@ def closeBehaviorGroupsDialog(dialogOld: QtWidgets.QDialog, Dialog: QtWidgets.QD
 
 def openBehaviorsDialog(Dialog: QtWidgets.QDialog, listWidget: QtWidgets.QListWidget, dataframe: pd.DataFrame, selected_subjects: list):
     behaviorGroupsList =  [str(listWidget.item(i).text()) for i in range(listWidget.count())]
-    print(behaviorGroupsList)
     if behaviorGroupsList:
         Dialog.hide()
         newDialog = QtWidgets.QDialog()
