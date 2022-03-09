@@ -57,7 +57,7 @@ Configure your behavior groups. The groups represent the labels on the y-axis in
 </li>
 <br>
 <li>
-Choose which behaviors to include & assign them to their respective groups. Behaviors belonging to the same group will show up on the same horizontal line in the ethogram. You can also set the x-limits and change the bar heights by clicking on *additional settings* :
+Choose which behaviors to include & assign them to their respective groups. Behaviors belonging to the same group will show up on the same horizontal line in the ethogram. You can also set the x-limits and change the bar heights by clicking on <i>additional settings</i> :
 
 <br>
 <p align="center">
