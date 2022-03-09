@@ -66,7 +66,7 @@ Choose which behaviors to include & assign them to their respective groups. Beha
 </li>
 <br>
 <li>
-Finally, you can further customize you plots using the matplotlib interface (rename axis labels, set title, ...) & save your figure:
+Finally, you can further customize your plots using the matplotlib interface (rename axis labels, set title, ...) & save your figure:
 
 <br>
 <p align="center">
