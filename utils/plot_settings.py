@@ -5,7 +5,7 @@ import pandas as pd
 import datetime as dt
 import re
 from PyQt5 import QtCore, QtWidgets, QtGui
-from utils.warning_functions import DuplicateItemWarning, InvalidColorWarning, InvalidXLimitsWarning
+from utils.warning_functions import DuplicateItemWarning, InvalidColorWarning, InvalidXLimitsWarning, InvalidBarHeightWarning
 import re
 from collections import OrderedDict
 
@@ -254,6 +254,7 @@ class BehaviorsDialog():
         self.retranslateUi(Dialog)
         self.lowerXLimit = None
         self.upperXLimit = None
+        self.barHeight = 0.5
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog: QtWidgets.QDialog):
@@ -305,7 +306,7 @@ class BehaviorsDialog():
                 for row in subject_behavior_df.iterrows():
                     start = matplotlib.dates.date2num(init + dt.timedelta(seconds=row[1]['Start (s)']))
                     end = matplotlib.dates.date2num(init + dt.timedelta(seconds=row[1]['Stop (s)']))
-                    axs[subject_idx].barh(behaviorGroupsList.index(options_dict['group']) + 1, end - start, left=start, height=0.5, align="center", edgecolor='#'+options_dict['color'], color='#'+options_dict['color'], alpha=1)
+                    axs[subject_idx].barh(behaviorGroupsList.index(options_dict['group']) + 1, end - start, left=start, height=self.barHeight, align="center", edgecolor='#'+options_dict['color'], color='#'+options_dict['color'], alpha=1)
             axs[subject_idx].grid(color="g", linestyle=":")
             axs[subject_idx].set_yticks(np.arange(1, len(behaviorGroupsList) + 1))
             axs[subject_idx].set_yticklabels(behaviorGroupsList, fontdict={"fontsize": 10})
@@ -354,14 +355,22 @@ class AdditionalSettingsDialog():
         self.lineEdit_2.setEnabled(False)
         self.lineEdit_2.setGeometry(QtCore.QRect(120, 90, 81, 20))
         self.lineEdit_2.setObjectName("lineEdit_2")
+        self.lineEdit_3 = QtWidgets.QLineEdit(Dialog)
 
-        self.checkBox.stateChanged.connect(lambda : self.onChecked(behaviorsDialogClassRef))
-        self.pushButton.clicked.connect(lambda : self.update_xlimits(Dialog, behaviorsDialogClassRef))
+        self.label_5 = QtWidgets.QLabel(Dialog)
+        self.label_5.setGeometry(QtCore.QRect(35, 135, 61, 16))
+        self.label_5.setObjectName("label_5")
+        self.lineEdit_3.setGeometry(QtCore.QRect(100, 135, 81, 20))
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.lineEdit_3.setText(str(behaviorsDialogClassRef.barHeight))
+
+        self.checkBox.stateChanged.connect(lambda : self.onChecked())
+        self.pushButton.clicked.connect(lambda : self.updatePlotSettings(Dialog, behaviorsDialogClassRef))
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def onChecked(self, behaviorsDialogClassRef):
+    def onChecked(self):
         if self.checkBox.isChecked():
             self.lineEdit_2.setEnabled(False)
             self.lineEdit.setEnabled(False)
@@ -369,19 +378,28 @@ class AdditionalSettingsDialog():
             self.lineEdit_2.setEnabled(True)
             self.lineEdit.setEnabled(True)
 
-    def update_xlimits(self, Dialog: QtWidgets.QDialog, behaviorsDialogClassRef):
-        if not self.checkBox.isChecked():
-            numericRE = '^\+?[0-9]+$'
-            if re.search(numericRE, self.lineEdit.text()) and re.search(numericRE, self.lineEdit_2.text()):
-                print('here')
-                behaviorsDialogClassRef.lowerXLimit = int(self.lineEdit.text())
-                behaviorsDialogClassRef.upperXLimit = int(self.lineEdit_2.text())
-                Dialog.close()
-            else:
-                InvalidXLimitsWarning()
+    def updatePlotSettings(self, Dialog: QtWidgets.QDialog, behaviorsDialogClassRef):
+        numericRE = '^\+?[0-9]+$'
+        heightRE = '^([0-9]*[1-9]+[0-9]*(.[0-9]*)?)|([0-9]*.[0-9]*[1-9]+[0-9]*)$'
+        validXLimits = validBarHeight = False
+        if (not self.checkBox.isChecked() and re.search(numericRE, self.lineEdit.text()) and re.search(numericRE, self.lineEdit_2.text())) or self.checkBox.isChecked():
+                validXLimits = True
         else:
-            behaviorsDialogClassRef.lowerXLimit = None
-            behaviorsDialogClassRef.upperXLimit = None
+            validXLimits = False
+            InvalidXLimitsWarning()
+        if re.search(heightRE, self.lineEdit_3.text()):
+            validBarHeight = True
+        else:
+            validBarHeight = False
+            InvalidBarHeightWarning()
+        if validXLimits and validBarHeight:
+            if not self.checkBox.isChecked():
+                behaviorsDialogClassRef.lowerXLimit = float(self.lineEdit.text())
+                behaviorsDialogClassRef.upperXLimit = float(self.lineEdit_2.text())
+            else:
+                behaviorsDialogClassRef.lowerXLimit = None
+                behaviorsDialogClassRef.upperXLimit = None
+            behaviorsDialogClassRef.barHeight = float(self.lineEdit_3.text())
             Dialog.close()
 
 
@@ -394,3 +412,4 @@ class AdditionalSettingsDialog():
         self.label_2.setText(_translate("Dialog", "seconds"))
         self.label_3.setText(_translate("Dialog", "upper x-limit:"))
         self.label_4.setText(_translate("Dialog", "seconds"))
+        self.label_5.setText(_translate("Dialog", "bar height:"))

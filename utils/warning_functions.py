@@ -41,5 +41,11 @@ def InvalidColorWarning():
 def InvalidXLimitsWarning():
     msg = QMessageBox()
     msg.setWindowTitle("Invalid x-limits Warning")
-    msg.setText('Please enter only numeric digits (0-9).\n')
+    msg.setText('Please enter valid numeric digits for x-limits.\n')
+    msg.exec_()
+
+def InvalidBarHeightWarning():
+    msg = QMessageBox()
+    msg.setWindowTitle("Invalid bar height warning")
+    msg.setText('Please enter a valid numeric bar height .\n')
     msg.exec_()
